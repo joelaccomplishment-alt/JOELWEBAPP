@@ -1,43 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Simple Directory App</title>
   <style>
-    * { box-sizing: border-box; font-family: Arial, sans-serif; }
-    body { background: #f4f6f9; margin: 0; padding: 20px; display: flex; justify-content: center; }
-    .container { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
-    h2 { margin-top: 0; color: #333; text-align: center; }
-    label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
-    input { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
-    button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; font-weight: bold; }
-    button:hover { background: #0056b3; }
-    button:disabled { background: #99c2ff; cursor: not-allowed; }
-    #status { margin-top: 10px; text-align: center; font-weight: bold; }
-    table { width: 100%; border-collapse: collapse; margin-top: 25px; }
-    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 14px; }
-    th { background: #f8f9fa; color: #333; }
+    * {
+      box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 40px 16px;
+      background-color: #f4f6f9;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+
+    .card {
+      background: #ffffff;
+      width: 100%;
+      max-width: 480px;
+      padding: 28px 24px;
+      border-radius: 10px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    h2 {
+      text-align: center;
+      margin-top: 0;
+      margin-bottom: 24px;
+      color: #222;
+      font-size: 22px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: bold;
+      color: #444;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input[type="text"]:focus {
+      border-color: #007bff;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      font-size: 15px;
+      font-weight: bold;
+      color: #ffffff;
+      background-color: #007bff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 4px;
+      transition: background-color 0.2s;
+    }
+
+    button:hover {
+      background-color: #0062cc;
+    }
+
+    button:disabled {
+      background-color: #7ab8ff;
+      cursor: not-allowed;
+    }
+
+    h3 {
+      margin-top: 26px;
+      margin-bottom: 12px;
+      font-size: 16px;
+      color: #222;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th, td {
+      border: 1px solid #e0e0e0;
+      padding: 10px 12px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f8f9fa;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .center-text {
+      text-align: center;
+      color: #555;
+    }
   </style>
 </head>
 <body>
 
-  <div class="container">
+  <div class="card">
     <h2>Register Information</h2>
 
-    <form id="myForm">
-      <label for="name">NAME:</label>
-      <input type="text" id="name" placeholder="Ilagay ang pangalan" required>
+    <form id="registerForm">
+      <div class="form-group">
+        <label for="name">NAME:</label>
+        <input type="text" id="name" placeholder="Ilagay ang pangalan" required />
+      </div>
 
-      <label for="address">ADDRESS:</label>
-      <input type="text" id="address" placeholder="Ilagay ang address" required>
+      <div class="form-group">
+        <label for="address">ADDRESS:</label>
+        <input type="text" id="address" placeholder="Ilagay ang address" required />
+      </div>
 
       <button type="submit" id="submitBtn">Save to Google Sheets</button>
     </form>
 
-    <div id="status"></div>
-
     <h3>Saved Records</h3>
+
     <table>
       <thead>
         <tr>
@@ -45,57 +146,97 @@
           <th>Address</th>
         </tr>
       </thead>
-      <tbody id="tableBody">
-        <tr><td colspan="2" style="text-align:center;">Loading data...</td></tr>
+      <tbody id="recordsBody">
+        <tr>
+          <td colspan="2" class="center-text">Loading data...</td>
+        </tr>
       </tbody>
     </table>
   </div>
 
   <script>
-    // PALITAN ITO NG IYONG GOOGLE APPS SCRIPT /exec URL
-    const GAS_URL = "ILAGAY_DITO_ANG_GAS_URL";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbydLErlcKPKvouK3rMak4jqpMFCVTvzdaZrxFWQSk25V2mxxbiKtxIw1Ydl5Fagp-F3FA/exec";
 
-    const form = document.getElementById("myForm");
+    const form = document.getElementById("registerForm");
+    const nameInput = document.getElementById("name");
+    const addressInput = document.getElementById("address");
     const submitBtn = document.getElementById("submitBtn");
-    const statusDiv = document.getElementById("status");
-    const tableBody = document.getElementById("tableBody");
+    const recordsBody = document.getElementById("recordsBody");
 
-    // 1. Function para kunin at ipakita ang data mula sa Google Sheets
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text ?? "";
+      return div.innerHTML;
+    }
+
     async function loadRecords() {
+      recordsBody.innerHTML = '<tr><td colspan="2" class="center-text">Loading data...</td></tr>';
+
       try {
-        const response = await fetch(GAS_URL);
+        const response = await fetch(SCRIPT_URL);
         const data = await response.json();
 
-        tableBody.innerHTML = "";
-        if (data.length === 0) {
-          tableBody.innerHTML = '<tr><td colspan="2" style="text-align:center;">Wala pang laman.</td></tr>';
+        recordsBody.innerHTML = "";
+
+        if (!data || data.length === 0) {
+          recordsBody.innerHTML = '<tr><td colspan="2" class="center-text">Walang records pa.</td></tr>';
           return;
         }
 
-        // Ipakita mula pinakabago pababa
-        data.reverse().forEach(row => {
-          const tr = document.createElement("tr");
-          const tdName = document.createElement("td");
-          const tdAddress = document.createElement("td");
-
-          tdName.textContent = row.name;
-          tdAddress.textContent = row.address;
-
-          tr.appendChild(tdName);
-          tr.appendChild(tdAddress);
-          tableBody.appendChild(tr);
+        data.forEach(record => {
+          const row = `
+            <tr>
+              <td>${escapeHtml(record.name)}</td>
+              <td>${escapeHtml(record.address)}</td>
+            </tr>
+          `;
+          recordsBody.innerHTML += row;
         });
       } catch (error) {
-        tableBody.innerHTML = '<tr><td colspan="2" style="text-align:center; color:red;">Error sa pag-load ng data.</td></tr>';
-        console.error(error);
+        console.error("Error loading data:", error);
+        recordsBody.innerHTML = '<tr><td colspan="2" class="center-text">Hindi ma-load ang data.</td></tr>';
       }
     }
 
-    // 2. Function para mag-save ng bagong entry pagka-submit
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const name = document.getElementById("name").value.trim();
-      const address = document.getElementById("address").value.trim();
-
       submitBtn.disabled = true;
+      submitBtn.textContent = "Saving...";
+
+      const payload = {
+        name: nameInput.value.trim(),
+        address: addressInput.value.trim()
+      };
+
+      try {
+        const response = await fetch(SCRIPT_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "text/plain;charset=utf-8"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+
+        if (result.status === "success") {
+          form.reset();
+          await loadRecords();
+        } else {
+          alert("May problema sa pag-save.");
+        }
+      } catch (error) {
+        console.error("Error saving data:", error);
+        alert("May error sa pag-save sa Google Sheets!");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Save to Google Sheets";
+      }
+    });
+
+    loadRecords();
+  </script>
+
+</body>
+</html>
