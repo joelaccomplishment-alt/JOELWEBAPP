@@ -104,6 +104,7 @@
       border: 1px solid #e0e0e0;
       padding: 10px 12px;
       text-align: left;
+      word-break: break-word;
     }
 
     th {
@@ -155,6 +156,7 @@
   </div>
 
   <script>
+    // Palitan ito ng sarili mong Web App URL kung nag-New deployment ka
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbydLErlcKPKvouK3rMak4jqpMFCVTvzdaZrxFWQSk25V2mxxbiKtxIw1Ydl5Fagp-F3FA/exec";
 
     const form = document.getElementById("registerForm");
@@ -173,25 +175,30 @@
       recordsBody.innerHTML = '<tr><td colspan="2" class="center-text">Loading data...</td></tr>';
 
       try {
-        const response = await fetch(SCRIPT_URL);
+        const response = await fetch(SCRIPT_URL + "?t=" + Date.now());
+        if (!response.ok) {
+          throw new Error("HTTP error: " + response.status);
+        }
+
         const data = await response.json();
 
-        recordsBody.innerHTML = "";
+        if (!Array.isArray(data)) {
+          throw new Error(data.message || "Invalid response format.");
+        }
 
-        if (!data || data.length === 0) {
+        if (data.length === 0) {
           recordsBody.innerHTML = '<tr><td colspan="2" class="center-text">Walang records pa.</td></tr>';
           return;
         }
 
-        data.forEach(record => {
-          const row = `
+        recordsBody.innerHTML = data
+          .map(record => `
             <tr>
               <td>${escapeHtml(record.name)}</td>
               <td>${escapeHtml(record.address)}</td>
             </tr>
-          `;
-          recordsBody.innerHTML += row;
-        });
+          `)
+          .join("");
       } catch (error) {
         console.error("Error loading data:", error);
         recordsBody.innerHTML = '<tr><td colspan="2" class="center-text">Hindi ma-load ang data.</td></tr>';
@@ -201,13 +208,18 @@
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      submitBtn.disabled = true;
-      submitBtn.textContent = "Saving...";
-
       const payload = {
         name: nameInput.value.trim(),
         address: addressInput.value.trim()
       };
+
+      if (!payload.name || !payload.address) {
+        alert("Pakilagay ang Name at Address.");
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Saving...";
 
       try {
         const response = await fetch(SCRIPT_URL, {
@@ -218,13 +230,17 @@
           body: JSON.stringify(payload)
         });
 
+        if (!response.ok) {
+          throw new Error("HTTP error: " + response.status);
+        }
+
         const result = await response.json();
 
         if (result.status === "success") {
           form.reset();
           await loadRecords();
         } else {
-          alert("May problema sa pag-save.");
+          alert("May problema sa pag-save: " + (result.message || "Unknown error"));
         }
       } catch (error) {
         console.error("Error saving data:", error);
